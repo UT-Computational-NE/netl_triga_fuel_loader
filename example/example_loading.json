@@ -1,0 +1,71 @@
+{
+  "assignments": {
+    "B-01": "Fuel_Hot",
+    "B-02": "Fuel_Hot",
+    "B-03": "Fuel_Hot",
+    "B-04": "Fuel_Hot",
+    "B-05": "Fuel_Hot",
+    "B-06": "Fuel_Hot",
+    "C-02": "Fuel_Warm",
+    "C-03": "Fuel_Warm",
+    "C-04": "Fuel_Warm",
+    "C-05": "Fuel_Warm",
+    "C-06": "Fuel_Warm"
+  },
+  "groups": {
+    "Fuel_Hot": {
+      "density": 5.85,
+      "density_units": "g/cm3",
+      "elements": {
+        "Cr": 0.013573,
+        "Fe": 0.049647,
+        "Ni": 0.0067863
+      },
+      "name": "Fuel_Hot",
+      "nuclides": {
+        "H1": 0.014355,
+        "Mn55": 0.0014287,
+        "U235": 0.0152,
+        "U238": 0.061568,
+        "Zr90": 0.43706,
+        "Zr91": 0.0942,
+        "Zr92": 0.14253,
+        "Zr94": 0.14136,
+        "Zr96": 0.02228
+      },
+      "percent_type": "wo",
+      "s_alpha_beta": [
+        "c_H_in_ZrH",
+        "c_Zr_in_ZrH"
+      ],
+      "temperature": 800.0
+    },
+    "Fuel_Warm": {
+      "density": 5.85,
+      "density_units": "g/cm3",
+      "elements": {
+        "Cr": 0.013573,
+        "Fe": 0.049647,
+        "Ni": 0.0067863
+      },
+      "name": "Fuel_Warm",
+      "nuclides": {
+        "H1": 0.014355,
+        "Mn55": 0.0014287,
+        "U235": 0.0152,
+        "U238": 0.061568,
+        "Zr90": 0.43706,
+        "Zr91": 0.0942,
+        "Zr92": 0.14253,
+        "Zr94": 0.14136,
+        "Zr96": 0.02228
+      },
+      "percent_type": "wo",
+      "s_alpha_beta": [
+        "c_H_in_ZrH",
+        "c_Zr_in_ZrH"
+      ],
+      "temperature": 700.0
+    }
+  }
+}
