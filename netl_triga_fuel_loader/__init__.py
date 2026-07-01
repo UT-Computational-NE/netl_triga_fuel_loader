@@ -19,6 +19,7 @@ __version__ = "0.1.0"
 # lightweight. Any heavier module added later (e.g. the specs.py generator, which
 # builds openmc materials) should be imported lazily rather than here.
 from netl_triga_fuel_loader import core_map
+from netl_triga_fuel_loader.generator import SpecsConfig, render_specs, write_specs
 from netl_triga_fuel_loader.loading import CoreLoadingPattern
 from netl_triga_fuel_loader.materials import FuelMaterialSpec, make_fuel, require_unique_names
 
@@ -29,4 +30,7 @@ __all__ = [
     "FuelMaterialSpec",
     "make_fuel",
     "require_unique_names",
+    "SpecsConfig",
+    "render_specs",
+    "write_specs",
 ]
