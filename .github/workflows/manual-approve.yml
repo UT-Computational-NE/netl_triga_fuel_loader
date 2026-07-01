@@ -22,7 +22,7 @@ jobs:
           github-token: ${{ secrets.NPL436_BOT_TOKEN }}
           script: |
             const pr = parseInt('${{ github.event.inputs.pr_number }}', 10);
-            const message = `${{ github.event.inputs.message }} || 'Approved by bot per request';
+            const message = '${{ github.event.inputs.message }}' || 'Approved by bot per request';
             await github.rest.pulls.createReview({
               owner: context.repo.owner,
               repo: context.repo.repo,
