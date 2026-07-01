@@ -1,0 +1,87 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "netl_triga_fuel_loader"
+version = "0.1.0"
+authors = [
+  { name="Nicholas Luciano", email="nicholas.luciano@austin.utexas.edu" },
+]
+description = "GUI + generator for per-location NETL TRIGA fuel loading; produces specs.py inputs for MPACT/OpenMC reactor models"
+readme = "README.md"
+keywords = []
+requires-python = ">=3.10"
+license = {text = "BSD-3-Clause"}
+classifiers = [
+    'Development Status :: 2 - Pre-Alpha',
+    'License :: OSI Approved :: BSD-3-Clause',
+    'Programming Language :: Python :: 3',
+    'Operating System :: OS Independent',
+]
+dependencies = [
+    "numpy>=1.24.0",
+    "openmc>=0.14.0",
+    "coreforge>=0.0.1",
+    "progression_problems>=0.0.1",
+]
+
+[project.optional-dependencies]
+gui = [
+    "dash",
+    "plotly",
+]
+dev = [
+    "pytest",
+    "pylint",
+    "black",
+    "darker",
+]
+test = [
+    "pytest",
+    "pylint",
+]
+
+[project.urls]
+Homepage = "https://github.com/UT-Computational-NE/netl_triga_fuel_loader"
+Issues = "https://github.com/UT-Computational-NE/netl_triga_fuel_loader/issues"
+
+[tool.setuptools.packages.find]
+include = ["netl_triga_fuel_loader*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.pylint.'messages control']
+disable = [
+    "chained-comparison",
+    "broad-exception-raised",
+    "broad-exception-caught",
+    "dangerous-default-value",
+    "duplicate-code",
+    "eval-used",
+    "fixme",
+    "invalid-name",
+    "missing-module-docstring",
+    "missing-function-docstring",
+    "pointless-string-statement",
+    "redefined-outer-name",
+    "too-few-public-methods",
+    "too-many-lines",
+    "too-many-locals",
+    "too-many-branches",
+    "too-many-ancestors",
+    "too-many-arguments",
+    "too-many-statements",
+    "too-many-nested-blocks",
+    "too-many-instance-attributes",
+    "too-many-positional-arguments",
+    "unspecified-encoding",
+    "unused-variable"
+]
+
+[tool.pylint.'format']
+max-line-length = 127
+
+[tool.black]
+line-length = 127
