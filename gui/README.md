@@ -9,9 +9,13 @@ Built in [#5](https://github.com/UT-Computational-NE/netl_triga_fuel_loader/issu
 (hex map) and [#6](https://github.com/UT-Computational-NE/netl_triga_fuel_loader/issues/6)
 (forms + generate).
 
-Install the GUI extras and run locally:
+Install the GUI extras and run locally (from the repo root):
 
 ```bash
 pip install -e ".[gui]"
-python gui/app.py
+python -m gui.app
 ```
+
+Currently implemented (#5): the interactive radial hex map with click-to-select.
+Clicking a fuel location (light blue) selects and highlights it; reserved and
+non-fuel cells are greyed out and non-selectable.

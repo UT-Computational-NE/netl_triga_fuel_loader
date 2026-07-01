@@ -84,6 +84,6 @@ jobs:
     - name: Install and Test netl_triga_fuel_loader
       run: |
         source $(conda info --base)/etc/profile.d/conda.sh && conda activate openmc-env
-        python -m pip install .
+        python -m pip install ".[gui]"
         pytest tests/ || [ $? -eq 5 ] || exit $?
         python -m pylint ./netl_triga_fuel_loader
