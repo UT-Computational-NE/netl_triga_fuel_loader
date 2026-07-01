@@ -16,20 +16,17 @@ jobs:
   approve:
     runs-on: ubuntu-latest
     steps:
-      - name: Approve PR via bot token
-        env:
-          BOT_TOKEN: ${{ secrets.NPL436_BOT_TOKEN }}
-          REPO: ${{ github.repository }}
-          PR_NUMBER: ${{ github.event.inputs.pr_number }}
-          MESSAGE: ${{ github.event.inputs.message }}
-        run: |
-          if [ -z "$BOT_TOKEN" ]; then
-            echo "BOT_TOKEN secret not set; aborting.";
-            exit 1;
-          fi
-          echo "Approving PR #$PR_NUMBER on $REPO"
-          curl -sS -H "Authorization: token $BOT_TOKEN" \
-            -H "Content-Type: application/json" \
-            -X POST \
-            -d "{\"body\": \"$MESSAGE\", \"event\": \"APPROVE\"}" \
-            "https://api.github.com/repos/$REPO/pulls/$PR_NUMBER/reviews" | jq -C '.' || true
+      - name: Approve PR via bot token (github-script)
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.NPL436_BOT_TOKEN }}
+          script: |
+            const pr = parseInt('${{ github.event.inputs.pr_number }}', 10);
+            const message = `${{ github.event.inputs.message }} || 'Approved by bot per request';
+            await github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr,
+              event: 'APPROVE',
+              body: message
+            });
