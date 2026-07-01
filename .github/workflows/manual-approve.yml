@@ -18,7 +18,7 @@ jobs:
     steps:
       - name: Approve PR via bot token
         env:
-          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          BOT_TOKEN: ${{ secrets.NPL436_BOT_TOKEN }}
           REPO: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.inputs.pr_number }}
           MESSAGE: ${{ github.event.inputs.message }}
