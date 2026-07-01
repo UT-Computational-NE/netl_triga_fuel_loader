@@ -1,0 +1,95 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "netl_triga_fuel_loader"
+# Single-sourced from netl_triga_fuel_loader.__version__ (see [tool.setuptools.dynamic]).
+dynamic = ["version"]
+authors = [
+  { name="Nicholas Luciano", email="nicholas.luciano@austin.utexas.edu" },
+]
+description = "GUI + generator for per-location NETL TRIGA fuel loading; produces specs.py inputs for MPACT/OpenMC reactor models"
+readme = "README.md"
+keywords = []
+requires-python = ">=3.10"
+license = {text = "BSD-3-Clause"}
+classifiers = [
+    'Development Status :: 2 - Pre-Alpha',
+    'License :: OSI Approved :: BSD-3-Clause',
+    'Programming Language :: Python :: 3',
+    'Operating System :: OS Independent',
+]
+# Engine deps: lower bounds mirror the model libraries this tool drives
+# (progression_problems and CoreForge), which own the effective compatibility
+# range for openmc / numpy. Kept in sync with those repos rather than pinned
+# independently here.
+dependencies = [
+    "numpy>=1.24.0",
+    "openmc>=0.14.0",
+    "coreforge>=0.0.1",
+    "progression_problems>=0.0.1",
+]
+
+[project.optional-dependencies]
+gui = [
+    "dash>=2.14",
+    "plotly>=5.18",
+]
+dev = [
+    "pytest",
+    "pylint",
+    "black",
+    "darker",
+]
+test = [
+    "pytest",
+    "pylint",
+]
+
+[project.urls]
+Homepage = "https://github.com/UT-Computational-NE/netl_triga_fuel_loader"
+Issues = "https://github.com/UT-Computational-NE/netl_triga_fuel_loader/issues"
+
+[tool.setuptools.packages.find]
+include = ["netl_triga_fuel_loader*"]
+
+[tool.setuptools.dynamic]
+version = {attr = "netl_triga_fuel_loader.__version__"}
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.pylint.'messages control']
+disable = [
+    "chained-comparison",
+    "broad-exception-raised",
+    "broad-exception-caught",
+    "dangerous-default-value",
+    "duplicate-code",
+    "eval-used",
+    "fixme",
+    "invalid-name",
+    "missing-module-docstring",
+    "missing-function-docstring",
+    "pointless-string-statement",
+    "redefined-outer-name",
+    "too-few-public-methods",
+    "too-many-lines",
+    "too-many-locals",
+    "too-many-branches",
+    "too-many-ancestors",
+    "too-many-arguments",
+    "too-many-statements",
+    "too-many-nested-blocks",
+    "too-many-instance-attributes",
+    "too-many-positional-arguments",
+    "unspecified-encoding",
+    "unused-variable"
+]
+
+[tool.pylint.'format']
+max-line-length = 127
+
+[tool.black]
+line-length = 127
