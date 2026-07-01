@@ -7,40 +7,37 @@ from netl_triga_fuel_loader import core_map
 from gui import hexmap
 
 
-def _marker(figure):
-    return figure.data[0].marker
+def _trace_by_location(figure):
+    """Map each location to its hexagon trace (one filled hexagon per location)."""
+    return {trace.customdata[0]: trace for trace in figure.data}
 
 
-def test_figure_has_all_locations_with_customdata():
+def test_figure_has_one_hexagon_per_location():
     figure = hexmap.build_core_figure()
-    assert len(figure.data) == 1
-    assert tuple(figure.data[0].customdata) == core_map.ALL_LOCATIONS
-    assert len(_marker(figure).color) == len(core_map.ALL_LOCATIONS)
+    assert len(figure.data) == len(core_map.ALL_LOCATIONS)
+    assert set(_trace_by_location(figure)) == set(core_map.ALL_LOCATIONS)
+    # Each hexagon is a closed filled polygon (7 points, fill='toself').
+    a01 = _trace_by_location(figure)["A-01"]
+    assert a01.fill == "toself"
+    assert len(a01.x) == 7 and a01.x[0] == a01.x[-1]
 
 
 def test_category_colors_applied():
-    figure = hexmap.build_core_figure()
-    locations = list(core_map.ALL_LOCATIONS)
-    colors = list(_marker(figure).color)
-    color_of = dict(zip(locations, colors))
-    assert color_of["A-01"] == hexmap.CATEGORY_COLORS["reserved"]  # central thimble
-    assert color_of["D-03"] == hexmap.CATEGORY_COLORS["non_fuel"]  # graphite
-    assert color_of["B-01"] == hexmap.CATEGORY_COLORS["fuel"]  # unassigned fuel
+    trace_of = _trace_by_location(hexmap.build_core_figure())
+    assert trace_of["A-01"].fillcolor == hexmap.CATEGORY_COLORS["reserved"]  # central thimble
+    assert trace_of["D-03"].fillcolor == hexmap.CATEGORY_COLORS["non_fuel"]  # graphite
+    assert trace_of["B-01"].fillcolor == hexmap.CATEGORY_COLORS["fuel"]  # unassigned fuel
 
 
 def test_assignment_colors_override_category():
     figure = hexmap.build_core_figure(assignments={"B-01": "Fuel_Hot"}, group_colors={"Fuel_Hot": "#ff0000"})
-    locations = list(core_map.ALL_LOCATIONS)
-    color_of = dict(zip(locations, _marker(figure).color))
-    assert color_of["B-01"] == "#ff0000"
+    assert _trace_by_location(figure)["B-01"].fillcolor == "#ff0000"
 
 
 def test_selected_cell_is_highlighted():
-    figure = hexmap.build_core_figure(selected="B-01")
-    locations = list(core_map.ALL_LOCATIONS)
-    width_of = dict(zip(locations, _marker(figure).line.width))
-    assert width_of["B-01"] == 3.0
-    assert width_of["B-02"] == 1.0
+    trace_of = _trace_by_location(hexmap.build_core_figure(selected="B-01"))
+    assert trace_of["B-01"].line.width == 3.0
+    assert trace_of["B-02"].line.width == 1.0
 
 
 def test_cell_category():

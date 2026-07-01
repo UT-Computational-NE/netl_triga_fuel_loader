@@ -8,11 +8,19 @@ in ``gui.app`` stay thin and testable.
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional
+import math
+from typing import Dict, List, Optional, Tuple
 
 import plotly.graph_objects as go
 
 from netl_triga_fuel_loader import core_map
+
+# Pointy-top hexagon vertex angles (points at top/bottom, flat vertical sides).
+_HEX_VERTEX_ANGLES = [math.radians(30 + 60 * i) for i in range(6)]
+
+# Circumradius that makes cells tile contiguously given core_map's ring spacing
+# (centers of adjacent cells are sqrt(3) apart, i.e. the flat-to-flat width).
+_HEX_SIZE = 1.0
 
 # Category fill colors for cells that are not assigned a fuel group.
 CATEGORY_COLORS: Dict[str, str] = {
@@ -56,19 +64,39 @@ def next_selection(current: Optional[str], clicked: Optional[str]) -> Optional[s
     return current
 
 
-def _fill_colors(
-    locations: List[str],
-    assignments: Dict[str, str],
-    group_colors: Dict[str, str],
-) -> List[str]:
-    colors: List[str] = []
-    for location in locations:
-        group = assignments.get(location)
-        if group is not None:
-            colors.append(group_colors.get(group, CATEGORY_COLORS["fuel"]))
-        else:
-            colors.append(CATEGORY_COLORS[cell_category(location)])
-    return colors
+def _fill_color(location: str, assignments: Dict[str, str], group_colors: Dict[str, str]) -> str:
+    """Fill color for a cell: its assigned group's color, else its category color."""
+    group = assignments.get(location)
+    if group is not None:
+        return group_colors.get(group, CATEGORY_COLORS["fuel"])
+    return CATEGORY_COLORS[cell_category(location)]
+
+
+def _hexagon_vertices(center: Tuple[float, float]) -> Tuple[List[float], List[float]]:
+    """Closed (x, y) vertex lists for a pointy-top hexagon centered at ``center``."""
+    cx, cy = center
+    xs = [cx + _HEX_SIZE * math.cos(angle) for angle in _HEX_VERTEX_ANGLES]
+    ys = [cy + _HEX_SIZE * math.sin(angle) for angle in _HEX_VERTEX_ANGLES]
+    return xs + [xs[0]], ys + [ys[0]]
+
+
+def _hexagon_trace(location: str, center: Tuple[float, float], fill: str, selected: bool) -> go.Scatter:
+    """A single filled, hoverable/clickable hexagon for one core location."""
+    xs, ys = _hexagon_vertices(center)
+    line = _SELECTED_LINE if selected else _DEFAULT_LINE
+    return go.Scatter(
+        x=xs,
+        y=ys,
+        mode="lines",
+        fill="toself",
+        fillcolor=fill,
+        line={"color": line["color"], "width": line["width"]},
+        hoveron="fills",
+        hoverinfo="text",
+        text=location,
+        customdata=[location] * len(xs),
+        showlegend=False,
+    )
 
 
 def build_core_figure(
@@ -76,7 +104,9 @@ def build_core_figure(
     group_colors: Optional[Dict[str, str]] = None,
     selected: Optional[str] = None,
 ) -> go.Figure:
-    """Build the core hex-map figure.
+    """Build the core hex-map figure as a contiguous honeycomb of filled hexagons.
+
+    Each core location is a filled hexagon; the location name appears only on hover.
 
     Parameters
     ----------
@@ -85,44 +115,31 @@ def build_core_figure(
     group_colors : dict[str, str], optional
         Fuel-group name -> fill color.
     selected : str, optional
-        Location to highlight with a bold outline.
+        Location to highlight with a bold outline (drawn last so it sits on top).
     """
     assignments = assignments or {}
     group_colors = group_colors or {}
-
     coordinates = core_map.hex_coordinates()
-    locations = list(core_map.ALL_LOCATIONS)
-    xs = [coordinates[location][0] for location in locations]
-    ys = [coordinates[location][1] for location in locations]
 
-    fill_colors = _fill_colors(locations, assignments, group_colors)
-    line_colors = [_SELECTED_LINE["color"] if loc == selected else _DEFAULT_LINE["color"] for loc in locations]
-    line_widths = [_SELECTED_LINE["width"] if loc == selected else _DEFAULT_LINE["width"] for loc in locations]
-
-    figure = go.Figure(
-        go.Scatter(
-            x=xs,
-            y=ys,
-            mode="markers+text",
-            text=locations,
-            textposition="middle center",
-            textfont={"size": 7, "color": "#222222"},
-            customdata=locations,
-            hovertext=locations,
-            hoverinfo="text",
-            marker={
-                "symbol": "hexagon",
-                "size": 22,
-                "color": fill_colors,
-                "line": {"color": line_colors, "width": line_widths},
-            },
+    traces = [
+        _hexagon_trace(
+            location,
+            coordinates[location],
+            _fill_color(location, assignments, group_colors),
+            selected=(location == selected),
         )
-    )
+        for location in core_map.ALL_LOCATIONS
+    ]
+    # Draw the selected cell last so its bold outline is not overdrawn by neighbors.
+    traces.sort(key=lambda trace: trace.customdata[0] == selected)
+
+    figure = go.Figure(traces)
     figure.update_layout(
         showlegend=False,
         margin={"l": 10, "r": 10, "t": 10, "b": 10},
         plot_bgcolor="white",
         height=700,
+        hovermode="closest",
     )
     figure.update_xaxes(visible=False)
     figure.update_yaxes(visible=False, scaleanchor="x", scaleratio=1)
