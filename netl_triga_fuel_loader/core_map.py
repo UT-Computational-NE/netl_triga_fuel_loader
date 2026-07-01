@@ -49,15 +49,16 @@ RESERVED_LOCATIONS: frozenset = frozenset(
     {"A-01", "C-01", "C-07", "D-06", "D-14", "G-01", "G-07", "G-13", "G-19", "G-25", "G-31"}
 )
 
+# Non-reserved positions that do not hold fuel in the NETL default loading: the
+# D-03 graphite element, the G-32 source holder, and the E-11 / F-13 / F-14 /
+# G-34 empty water holes.
+NON_FUEL_LOCATIONS: frozenset = frozenset({"D-03", "G-32", "E-11", "F-13", "F-14", "G-34"})
+
 # Locations that hold a fuel element in the NETL default loading -- i.e. the
 # positions where a per-location fuel material may be placed. Mirrors the
 # FuelElement positions of progression_problems' NETLDefaultGeometries.core().
-# (Excludes reserved slots, the D-03 graphite element, the G-32 source holder,
-# and the E-11 / F-13 / F-14 / G-34 empty water holes.)
 FUEL_LOCATIONS: frozenset = frozenset(
-    loc
-    for loc in ALL_LOCATIONS
-    if loc not in RESERVED_LOCATIONS and loc not in {"D-03", "G-32", "E-11", "F-13", "F-14", "G-34"}
+    loc for loc in ALL_LOCATIONS if loc not in RESERVED_LOCATIONS and loc not in NON_FUEL_LOCATIONS
 )
 
 
@@ -80,7 +81,8 @@ def is_fuel_location(location: str) -> bool:
 
 # --- hex geometry ----------------------------------------------------------
 
-# Axial-coordinate step directions used to walk a hexagonal ring (red-blob order).
+# Axial-coordinate step directions used to walk a hexagonal ring, in order
+# (red-blob "Hexagonal Grids" ring algorithm).
 _AXIAL_DIRECTIONS: Tuple[Tuple[int, int], ...] = (
     (1, 0),
     (1, -1),
@@ -90,18 +92,23 @@ _AXIAL_DIRECTIONS: Tuple[Tuple[int, int], ...] = (
     (0, 1),
 )
 
+# The ring walk begins at this corner, scaled by the ring radius, before stepping
+# through _AXIAL_DIRECTIONS in order. (Per the red-blob algorithm, the start corner
+# is the direction opposite the first step direction.)
+_RING_START_DIRECTION: Tuple[int, int] = (-1, 1)
+
 
 def _ring_axial_cells(k: int) -> List[Tuple[int, int]]:
     """Axial (q, r) coordinates of the ``6*k`` cells of hex ring ``k`` (``[(0,0)]`` for k=0)."""
     if k == 0:
         return [(0, 0)]
     cells: List[Tuple[int, int]] = []
-    q, r = _AXIAL_DIRECTIONS[4][0] * k, _AXIAL_DIRECTIONS[4][1] * k
-    for direction in range(6):
-        dq, dr = _AXIAL_DIRECTIONS[direction]
+    q, r = _RING_START_DIRECTION[0] * k, _RING_START_DIRECTION[1] * k
+    for step in _AXIAL_DIRECTIONS:
+        step_q, step_r = step
         for _ in range(k):
             cells.append((q, r))
-            q, r = q + dq, r + dr
+            q, r = q + step_q, r + step_r
     return cells
 
 

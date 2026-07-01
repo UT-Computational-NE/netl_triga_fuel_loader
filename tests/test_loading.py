@@ -55,3 +55,10 @@ def test_json_roundtrip():
     restored = CoreLoadingPattern.from_json(pattern.to_json())
     assert restored.assignments == pattern.assignments
     assert restored.groups == pattern.groups
+
+
+def test_from_dict_rejects_unexpected_keys():
+    data = _pattern().to_dict()
+    data["assignmnets"] = {}  # typo -> should not be silently ignored
+    with pytest.raises(ValueError):
+        CoreLoadingPattern.from_dict(data)

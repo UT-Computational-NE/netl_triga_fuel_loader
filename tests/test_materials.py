@@ -35,6 +35,13 @@ def test_to_from_dict_roundtrip():
     assert restored == spec
 
 
+def test_from_dict_rejects_unexpected_keys():
+    data = FuelMaterialSpec(name="Fuel").to_dict()
+    data["densty"] = 6.0  # typo -> should not be silently ignored
+    with pytest.raises(ValueError):
+        FuelMaterialSpec.from_dict(data)
+
+
 def test_require_unique_names():
     a = FuelMaterialSpec(name="Fuel_A")
     a_again = FuelMaterialSpec(name="Fuel_A")  # identical -> allowed duplicate

@@ -1,3 +1,5 @@
+import pytest
+
 from netl_triga_fuel_loader import core_map
 
 
@@ -20,9 +22,11 @@ def test_reserved_and_fuel_partition():
     assert reserved.isdisjoint(fuel)
 
     # Non-fuel, non-reserved positions: graphite, source holder, empty holes.
-    non_fuel_loaded = {"D-03", "G-32", "E-11", "F-13", "F-14", "G-34"}
-    assert all_locs == fuel | reserved | non_fuel_loaded
-    assert non_fuel_loaded.isdisjoint(fuel)
+    non_fuel = core_map.NON_FUEL_LOCATIONS
+    assert len(non_fuel) == 6
+    assert all_locs == fuel | reserved | set(non_fuel)
+    assert non_fuel.isdisjoint(fuel)
+    assert non_fuel.isdisjoint(reserved)
 
 
 def test_predicates():
@@ -36,8 +40,6 @@ def test_predicates():
 
 
 def test_ring_of_rejects_unknown():
-    import pytest
-
     with pytest.raises(KeyError):
         core_map.ring_of("Z-99")
 

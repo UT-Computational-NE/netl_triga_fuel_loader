@@ -38,6 +38,12 @@ _DEFAULT_S_ALPHA_BETA: Tuple[str, ...] = ("c_H_in_ZrH", "c_Zr_in_ZrH")
 DEFAULT_FUEL_DENSITY: float = 5.85
 DEFAULT_FUEL_TEMPERATURE: float = 293.6
 
+# Keys accepted by FuelMaterialSpec.from_dict; anything else is rejected so that a
+# hand-edited/typo'd key (e.g. "densty") fails loudly instead of silently defaulting.
+_SPEC_KEYS: frozenset = frozenset(
+    {"name", "density", "density_units", "temperature", "nuclides", "elements", "percent_type", "s_alpha_beta"}
+)
+
 
 @dataclass(frozen=True)
 class FuelMaterialSpec:
@@ -100,7 +106,14 @@ class FuelMaterialSpec:
 
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> "FuelMaterialSpec":
-        """Build a spec from a dict produced by :meth:`to_dict`."""
+        """Build a spec from a dict produced by :meth:`to_dict`.
+
+        Unexpected keys are rejected (rather than silently ignored) so that a typo
+        or stale field surfaces as an error instead of a wrong default.
+        """
+        unexpected = set(data) - _SPEC_KEYS
+        if unexpected:
+            raise ValueError(f"Unexpected key(s) in fuel material spec: {sorted(unexpected)}")
         return cls(
             name=data["name"],
             density=data.get("density", DEFAULT_FUEL_DENSITY),

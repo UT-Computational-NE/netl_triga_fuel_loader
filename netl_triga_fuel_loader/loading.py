@@ -86,7 +86,14 @@ class CoreLoadingPattern:
 
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> "CoreLoadingPattern":
-        """Build a pattern from a dict produced by :meth:`to_dict`."""
+        """Build a pattern from a dict produced by :meth:`to_dict`.
+
+        Unexpected top-level keys are rejected (rather than silently ignored); the
+        nested group specs are likewise validated by ``FuelMaterialSpec.from_dict``.
+        """
+        unexpected = set(data) - {"groups", "assignments"}
+        if unexpected:
+            raise ValueError(f"Unexpected key(s) in loading pattern: {sorted(unexpected)}")
         groups = {name: FuelMaterialSpec.from_dict(spec_data) for name, spec_data in data.get("groups", {}).items()}
         assignments = dict(data.get("assignments", {}))
         return cls(groups=groups, assignments=assignments)
