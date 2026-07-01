@@ -4,7 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "netl_triga_fuel_loader"
-version = "0.1.0"
+# Single-sourced from netl_triga_fuel_loader.__version__ (see [tool.setuptools.dynamic]).
+dynamic = ["version"]
 authors = [
   { name="Nicholas Luciano", email="nicholas.luciano@austin.utexas.edu" },
 ]
@@ -19,6 +20,10 @@ classifiers = [
     'Programming Language :: Python :: 3',
     'Operating System :: OS Independent',
 ]
+# Engine deps: lower bounds mirror the model libraries this tool drives
+# (progression_problems and CoreForge), which own the effective compatibility
+# range for openmc / numpy. Kept in sync with those repos rather than pinned
+# independently here.
 dependencies = [
     "numpy>=1.24.0",
     "openmc>=0.14.0",
@@ -28,8 +33,8 @@ dependencies = [
 
 [project.optional-dependencies]
 gui = [
-    "dash",
-    "plotly",
+    "dash>=2.14",
+    "plotly>=5.18",
 ]
 dev = [
     "pytest",
@@ -48,6 +53,9 @@ Issues = "https://github.com/UT-Computational-NE/netl_triga_fuel_loader/issues"
 
 [tool.setuptools.packages.find]
 include = ["netl_triga_fuel_loader*"]
+
+[tool.setuptools.dynamic]
+version = {attr = "netl_triga_fuel_loader.__version__"}
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

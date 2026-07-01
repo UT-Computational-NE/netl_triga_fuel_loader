@@ -10,4 +10,6 @@ The public engine API is added in subsequent tickets:
   * ``generator`` -- renders ``specs.py`` from a loading pattern
 """
 
+# Single source of truth for the package version; pyproject reads this via
+# [tool.setuptools.dynamic]. Bump here on release.
 __version__ = "0.1.0"
