@@ -8,18 +8,27 @@ from gui import hexmap
 
 
 def _trace_by_location(figure):
-    """Map each location to its hexagon trace (one filled hexagon per location)."""
-    return {trace.customdata[0]: trace for trace in figure.data}
+    """Map each location to its filled-hexagon trace (the overlay trace is excluded)."""
+    return {trace.customdata[0]: trace for trace in figure.data if trace.fill == "toself"}
 
 
-def test_figure_has_one_hexagon_per_location():
+def _overlay(figure):
+    """The transparent marker overlay that captures clicks."""
+    markers = [trace for trace in figure.data if trace.mode == "markers"]
+    assert len(markers) == 1
+    return markers[0]
+
+
+def test_figure_has_one_hexagon_per_location_plus_click_overlay():
     figure = hexmap.build_core_figure()
-    assert len(figure.data) == len(core_map.ALL_LOCATIONS)
-    assert set(_trace_by_location(figure)) == set(core_map.ALL_LOCATIONS)
+    hexes = _trace_by_location(figure)
+    assert set(hexes) == set(core_map.ALL_LOCATIONS)
     # Each hexagon is a closed filled polygon (7 points, fill='toself').
-    a01 = _trace_by_location(figure)["A-01"]
+    a01 = hexes["A-01"]
     assert a01.fill == "toself"
     assert len(a01.x) == 7 and a01.x[0] == a01.x[-1]
+    # A single transparent marker overlay carries every location for click/hover.
+    assert tuple(_overlay(figure).customdata) == core_map.ALL_LOCATIONS
 
 
 def test_category_colors_applied():

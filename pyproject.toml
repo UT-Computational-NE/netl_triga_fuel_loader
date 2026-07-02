@@ -34,6 +34,7 @@ dependencies = [
 [project.optional-dependencies]
 gui = [
     "dash>=2.14",
+    "dash-ag-grid>=2.0",
     "plotly>=5.18",
 ]
 dev = [
