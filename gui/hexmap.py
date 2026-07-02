@@ -81,7 +81,8 @@ def _hexagon_vertices(center: Tuple[float, float]) -> Tuple[List[float], List[fl
 
 
 def _hexagon_trace(location: str, center: Tuple[float, float], fill: str, selected: bool) -> go.Scatter:
-    """A single filled, hoverable/clickable hexagon for one core location."""
+    """A single filled hexagon for one core location (visual only; clicks handled by
+    the center-marker overlay, since Plotly clicks don't fire on fill interiors)."""
     xs, ys = _hexagon_vertices(center)
     line = _SELECTED_LINE if selected else _DEFAULT_LINE
     return go.Scatter(
@@ -91,10 +92,26 @@ def _hexagon_trace(location: str, center: Tuple[float, float], fill: str, select
         fill="toself",
         fillcolor=fill,
         line={"color": line["color"], "width": line["width"]},
-        hoveron="fills",
-        hoverinfo="text",
-        text=location,
+        hoverinfo="skip",
         customdata=[location] * len(xs),
+        showlegend=False,
+    )
+
+
+def _click_overlay(locations, coordinates) -> go.Scatter:
+    """A transparent center-marker per cell that captures hover + click reliably.
+
+    With ``hovermode="closest"``, a click anywhere resolves to the nearest cell
+    center, so the whole honeycomb is effectively clickable.
+    """
+    return go.Scatter(
+        x=[coordinates[location][0] for location in locations],
+        y=[coordinates[location][1] for location in locations],
+        mode="markers",
+        marker={"size": 30, "color": "rgba(0,0,0,0)"},
+        customdata=list(locations),
+        hovertext=list(locations),
+        hoverinfo="text",
         showlegend=False,
     )
 
@@ -132,6 +149,8 @@ def build_core_figure(
     ]
     # Draw the selected cell last so its bold outline is not overdrawn by neighbors.
     traces.sort(key=lambda trace: trace.customdata[0] == selected)
+    # The transparent click/hover overlay sits on top of everything.
+    traces.append(_click_overlay(core_map.ALL_LOCATIONS, coordinates))
 
     figure = go.Figure(traces)
     figure.update_layout(
